@@ -1,4 +1,5 @@
-use crate::status::Status;
+use crate::status::{ParseStatusError, Status};
+use std::convert::TryFrom;
 
 // We've seen how to declare modules in one of the earliest exercises, but
 // we haven't seen how to extract them into separate files.
@@ -23,7 +24,9 @@ pub enum TicketNewError {
     DescriptionCannotBeEmpty,
     #[error("Description cannot be longer than 500 bytes")]
     DescriptionTooLong,
-}
+    #[error("{0}")]
+    InvalidStatus(#[from] ParseStatusError), // #[from] = 创建了一个"指向"，指向底层错误
+}                                            // source() = 用于遍历整个错误链，找到根本原因
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Ticket {
@@ -48,6 +51,7 @@ impl Ticket {
         }
 
         // TODO: Parse the status string into a `Status` enum.
+        let status = Status::try_from(status)?;
 
         Ok(Ticket {
             title,

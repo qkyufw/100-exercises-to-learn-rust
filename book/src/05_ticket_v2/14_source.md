@@ -67,7 +67,7 @@ Don't worry too much about either of these concepts for now. We'll cover them in
 - A field named `source` will automatically be used as the source of the error.
   ```rust
   use thiserror::Error;
-
+  
   #[derive(Error, Debug)]
   pub enum MyError {
       #[error("Failed to connect to the database")]
@@ -79,7 +79,7 @@ Don't worry too much about either of these concepts for now. We'll cover them in
 - A field annotated with the `#[source]` attribute will automatically be used as the source of the error.
   ```rust
   use thiserror::Error;
-
+  
   #[derive(Error, Debug)]
   pub enum MyError {
       #[error("Failed to connect to the database")]
@@ -93,7 +93,7 @@ Don't worry too much about either of these concepts for now. We'll cover them in
   `thiserror` will automatically generate a `From` implementation to convert the annotated type into your error type.
   ```rust
   use thiserror::Error;
-
+  
   #[derive(Error, Debug)]
   pub enum MyError {
       #[error("Failed to connect to the database")]
