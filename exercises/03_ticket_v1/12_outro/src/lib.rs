@@ -20,30 +20,39 @@ pub struct Order {
 
 impl Order {
     pub fn new(product_name:String, quantity:i32, unit_price:i32) -> Order {
+        assert!(!product_name.is_empty(), "Product name cannot be empty");
+        assert!(product_name.len() <= 300, "Product name cannot exceed 300 bytes");
+        assert!(quantity > 0, "Quantity must be greater than zero");
+        assert!(unit_price > 0, "Unit price must be greater than zero");
+
         Order { product_name, quantity, unit_price }
     }
 
-    pub fn product_name(self) -> &String {
+    pub fn product_name(&self) -> &String {
         &self.product_name
     }
 
-    pub fn quantity(self) -> &i32 {
+    pub fn quantity(&self) -> &i32 {
         &self.quantity
     }
 
-    pub fn unit_price(self) -> &i32 {
+    pub fn unit_price(&self) -> &i32 {
         &self.unit_price
     }
 
     pub fn set_product_name(&mut self, product_name:String) {
+        assert!(!product_name.is_empty(), "Product name cannot be empty");
+        assert!(product_name.len() <= 300, "Product name cannot exceed 300 bytes");
         self.product_name = product_name
     }
 
     pub fn set_quantity(&mut self, quantity:i32) {
+        assert!(quantity > 0, "Quantity must be greater than zero");
         self.quantity = quantity
     }
 
     pub fn set_unit_price(&mut self, unit_price:i32) {
+        assert!(unit_price > 0, "Unit price must be greater than zero");
         self.unit_price = unit_price
     }
 
