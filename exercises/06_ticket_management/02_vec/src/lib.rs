@@ -11,11 +11,22 @@
 // We expect `fibonacci(0)` to return `0`, `fibonacci(1)` to return `1`,
 // `fibonacci(2)` to return `1`, and so on.
 pub fn fibonacci(n: u32) -> u32 {
-    // TODO: implement the `fibonacci` function
-    //
-    // Hint: use a `Vec` to memoize the results you have already calculated
-    // so that you don't have to recalculate them several times.
-    todo!()
+    if n == 0 {
+        return 0;
+    } else if n == 1 {
+        return 1;
+    }
+
+    let mut numbers = Vec::with_capacity((n + 1) as usize); // 这里用了 n+1 来进行存储
+    numbers.push(0); // 不能使用 number[0] = 0 进行访问存储
+    numbers.push(1);
+
+    for i in 2..=n { // ..n 包含上限
+        let next = numbers[(i - 1) as usize] + numbers[(i - 2) as usize];
+        numbers.push(next);
+    }
+
+    numbers[n as usize]
 }
 
 #[cfg(test)]

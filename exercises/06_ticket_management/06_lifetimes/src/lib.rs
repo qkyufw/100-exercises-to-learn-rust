@@ -31,8 +31,17 @@ impl TicketStore {
         self.tickets.push(ticket);
     }
 
-    pub fn iter(&self) -> std::slice::Iter<Ticket> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Ticket> {
         self.tickets.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a TicketStore { // 这里我们在为引用类型实现 trait，生命周期的引用的有效期限
+    type Item = &'a Ticket;                 // 否则编译器不知道这个引用需要活多久
+    type IntoIter = std::slice::Iter<'a, Ticket>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 

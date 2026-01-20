@@ -31,6 +31,20 @@ impl TicketStore {
     pub fn add_ticket(&mut self, ticket: Ticket) {
         self.tickets.push(ticket);
     }
+
+    /// 返回所有状态为 `ToDo` 的票据的引用
+    ///
+    /// # 使用迭代器组合子和闭包的完整示例
+    pub fn to_dos(&self) -> Vec<&Ticket> {
+        self.tickets
+            .iter()                      // 1. 创建迭代器，遍历 &Ticket（引用）
+            .filter(|ticket| {           // 2. 组合子：filter（过滤元素）
+                                       //    闭包参数：|&Ticket| -> bool
+                ticket.status == Status::ToDo  // 3. 闭包逻辑：判断 status 是否为 ToDo
+            })                           //    返回 true 的元素被保留
+            .collect()                    // 4. 收集器：把结果收集到 Vec<&Ticket>
+                                       //    编译器根据返回类型自动推断
+    }
 }
 
 #[cfg(test)]

@@ -34,6 +34,10 @@ impl TicketStore {
     pub fn add_ticket(&mut self, ticket: Ticket) {
         self.tickets.push(ticket);
     }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, Ticket> { // 借用 &self，不消耗所有权
+        self.tickets.iter() // 返回 &Ticket，而不是 Ticket
+    }
 }
 
 #[cfg(test)]

@@ -13,6 +13,15 @@ pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
 
+impl IntoIterator for TicketStore {
+    type Item = Ticket; // 迭代器产生的元素类型
+    type IntoIter = std::vec::IntoIter<Ticket>; // 迭代器的具体类型
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.tickets.into_iter() // 委托给 Vec 的迭代器
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ticket {
     pub title: TicketTitle,
