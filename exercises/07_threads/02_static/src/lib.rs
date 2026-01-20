@@ -4,7 +4,29 @@
 use std::thread;
 
 pub fn sum(slice: &'static [i32]) -> i32 {
-    todo!()
+    // 计算分割点
+    let mid = slice.len() / 2;
+
+    // 在第一个线程中计算前半部分的和
+    // slice 是 &'static 的，满足 'static 生命周期约束
+    // move 关键字转移 mid 的所有权（i32 会复制）
+    // slice 仍然是引用，不拥有它，但因为满足 'static 所以安全
+    let handle1 = thread::spawn(move || {
+        slice[..mid].iter().sum::<i32>() // turbofish 语法，用来指定泛型类型参数
+    });
+
+    // 在第二个线程中计算后半部分的和
+    let handle2 = thread::spawn(move || {
+        slice[mid..].iter().sum::<i32>()
+    });
+
+    // 等待两个线程完成并获取结果
+    // join() 返回 Result<i32, Box<dyn Any>>
+    let result1 = handle1.join().unwrap();
+    let result2 = handle2.join().unwrap();
+
+    // 返回两个部分的和
+    result1 + result2
 }
 
 #[cfg(test)]

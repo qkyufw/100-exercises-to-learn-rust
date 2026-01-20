@@ -15,7 +15,40 @@
 use std::thread;
 
 pub fn sum(v: Vec<i32>) -> i32 {
-    todo!()
+    // 获取向量长度
+    let len = v.len();
+
+    // 处理边界情况：空向量直接返回0
+    if len == 0 {
+        return 0;
+    }
+
+    // 计算中点位置，将向量分成两半
+    let mid = len / 2;
+
+    // 将原向量分成两个新的向量（根据hint提示，需要分配新向量）
+    let first_half: Vec<i32> = v[..mid].to_vec();
+    let second_half: Vec<i32> = v[mid..].to_vec();
+
+    // 在第一个线程中计算前半部分的和
+    // move 关键字将 first_half 的所有权转移给闭包
+    let handle1 = thread::spawn(move || {
+        first_half.iter().sum::<i32>()
+    });
+
+    // 在第二个线程中计算后半部分的和
+    // move 关键字将 second_half 的所有权转移给闭包
+    let handle2 = thread::spawn(move || {
+        second_half.iter().sum::<i32>()
+    });
+
+    // 等待两个线程完成并获取结果
+    // join() 返回 Result<i32, Box<dyn Any>>
+    let sum1 = handle1.join().unwrap();
+    let sum2 = handle2.join().unwrap();
+
+    // 返回两个部分的和
+    sum1 + sum2
 }
 
 #[cfg(test)]

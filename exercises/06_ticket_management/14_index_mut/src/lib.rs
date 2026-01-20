@@ -1,12 +1,33 @@
 // TODO: Implement `IndexMut<&TicketId>` and `IndexMut<TicketId>` for `TicketStore`.
 
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
 pub struct TicketStore {
     tickets: Vec<Ticket>,
     counter: u64,
+}
+
+// 通过这样得到可以变的引用
+// 为 TicketStore 实现 IndexMut trait，支持使用 TicketId 进行可变索引
+// 这样你可以修改 ticket 内部的字段（如 status、title 等）
+// 例如: let ticket = &mut store[id]; ticket.status = Status::InProgress;
+impl IndexMut<TicketId> for TicketStore {
+    fn index_mut(&mut self, index: TicketId) -> &mut Self::Output {
+        // 调用 get_mut 方法获取可变引用
+        // unwrap() 在找不到时 panic（IndexMut trait 的约定）
+        self.get_mut(index).expect("Ticket not found")
+    }
+}
+
+// 为 TicketStore 实现 IndexMut trait，支持使用 &TicketId 进行可变索引
+// 例如: let ticket = &mut store[&id]; ticket.status = Status::Done;
+impl IndexMut<&TicketId> for TicketStore {
+    fn index_mut(&mut self, index: &TicketId) -> &mut Self::Output {
+        // 解引用后调用 get_mut
+        self.get_mut(*index).expect("Ticket not found")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -56,6 +77,13 @@ impl TicketStore {
 
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
         self.tickets.iter().find(|&t| t.id == id)
+    }
+
+    // 获取 ticket 的可变引用，允许修改 ticket 内部的字段
+    pub fn get_mut(&mut self, id: TicketId) -> Option<&mut Ticket> {
+        // iter_mut() 创建可变迭代器
+        // find() 查找匹配的 ticket
+        self.tickets.iter_mut().find(|t| t.id == id)
     }
 }
 

@@ -1,11 +1,39 @@
 // TODO: Implement `Index<&TicketId>` and `Index<TicketId>` for `TicketStore`.
 
+use std::ops::Index;
+
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
 pub struct TicketStore {
     tickets: Vec<Ticket>,
     counter: u64,
+}
+
+// 为 TicketStore 实现 Index trait，支持使用 &TicketId 进行索引
+// 例如: &store[&id]
+impl Index<&TicketId> for TicketStore {
+    // 关联类型：索引后返回的类型是 Ticket 的引用
+    type Output = Ticket;
+
+    fn index(&self, index: &TicketId) -> &Self::Output {
+        // 复用 get 方法查找 ticket
+        // *index 解引用，将 &TicketId 转换为 TicketId
+        // expect 在 Option 为 None 时会 panic（Index trait 的约定）
+        self.get(*index).expect("Ticket not found")
+    }
+}
+
+// 为 TicketStore 实现 Index trait，支持使用 TicketId 进行索引
+// 例如: &store[id]
+impl Index<TicketId> for TicketStore {
+    type Output = Ticket;
+
+    fn index(&self, index: TicketId) -> &Self::Output {
+        // 直接使用 get 方法查找
+        // expect 在找不到时 panic，这是 Index trait 的标准行为
+        self.get(index).expect("Ticket not found")
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

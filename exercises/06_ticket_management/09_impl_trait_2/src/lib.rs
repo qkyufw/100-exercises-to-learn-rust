@@ -29,11 +29,26 @@ impl TicketStore {
         }
     }
 
-    // Using `Into<Ticket>` as the type parameter for `ticket` allows the method to accept any type
-    // that can be infallibly converted into a `Ticket`.
-    // This can make it nicer to use the method, as it removes the syntax noise of `.into()`
-    // from the calling site. It can worsen the quality of the compiler error messages, though.
-    pub fn add_ticket(&mut self, ticket: impl Into<Ticket>) {
+    // 使用 `Into<Ticket>` 作为类型参数，使方法可以接受任何能够转换为 `Ticket` 的类型
+    // 这可以调用时更简洁，不需要显式调用 `.into()`
+    //
+    // # 为什么用泛型而不是 `impl Trait`？
+    //
+    // 参数位置的 `impl Trait` 完全等价于泛型：
+    //   `ticket: impl Into<Ticket>`  等价于  `<T: Into<Ticket>>(ticket: T)`
+    //
+    // 但推荐使用显式泛型的原因是：
+    /// 1. 允许使用 turbofish 语法显式指定类型参数
+    /// 2. 当类型推断有歧义时可以消除歧义
+    /// 3. API 更清晰明确
+    //
+    // 例如测试代码中使用了：
+    //   `store.add_ticket::<TicketDraft>(draft)`
+    // 这种写法只有泛型参数才支持，`impl Trait` 不支持。
+    pub fn add_ticket<T>(&mut self, ticket: T)
+    where
+        T: Into<Ticket>,
+    {
         self.tickets.push(ticket.into());
     }
 }

@@ -11,7 +11,11 @@ pub struct TicketStore {
     counter: u64,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+// TicketId 作为 HashMap 的 key，必须实现以下 trait：
+// - PartialEq: 可比较相等性
+// - Eq: 保证自反性（a == a 永远为 true）
+// - Hash: 可计算哈希值，HashMap 用它来快速定位数据
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct TicketId(u64);
 
 #[derive(Clone, Debug, PartialEq)]
@@ -38,7 +42,7 @@ pub enum Status {
 impl TicketStore {
     pub fn new() -> Self {
         Self {
-            tickets: todo!(),
+            tickets: HashMap::new(),
             counter: 0,
         }
     }
@@ -52,16 +56,25 @@ impl TicketStore {
             description: ticket.description,
             status: Status::ToDo,
         };
-        todo!();
+
+        // 3. 插入到 HashMap 中
+        // HashMap::insert 返回 Option<V>：如果 key 已存在，返回旧值；否则返回 None
+        self.tickets.insert(id, ticket);
+
+        // 4. 返回 ID
         id
     }
 
+    // 获取 ticket 的不可变引用
+    // HashMap::get 返回 Option<&V>，O(1) 时间复杂度
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
-        todo!()
+        self.tickets.get(&id)  // 注意：需要传 &id，因为 get 的参数是 &Q
     }
 
+    // 获取 ticket 的可变引用
+    // HashMap::get_mut 返回 Option<&mut V>，O(1) 时间复杂度
     pub fn get_mut(&mut self, id: TicketId) -> Option<&mut Ticket> {
-        todo!()
+        self.tickets.get_mut(&id)
     }
 }
 

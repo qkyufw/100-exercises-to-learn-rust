@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 use std::ops::{Index, IndexMut};
+use std::iter::IntoIterator;
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
@@ -13,7 +14,9 @@ pub struct TicketStore {
     counter: u64,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+// BTreeMap 的 key 必须实现 Ord trait（而 HashMap 需要 Hash + Eq）
+// Ord 允许 BTreeMap 按照键的顺序存储和遍历
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TicketId(u64);
 
 #[derive(Clone, Debug, PartialEq)]
@@ -40,30 +43,40 @@ pub enum Status {
 impl TicketStore {
     pub fn new() -> Self {
         Self {
-            tickets: todo!(),
+            tickets: BTreeMap::new(),  // 创建空的 BTreeMap
             counter: 0,
         }
     }
 
     pub fn add_ticket(&mut self, ticket: TicketDraft) -> TicketId {
+        // 1. 生成新的 ID
         let id = TicketId(self.counter);
         self.counter += 1;
+
+        // 2. 创建 Ticket
         let ticket = Ticket {
             id,
             title: ticket.title,
             description: ticket.description,
             status: Status::ToDo,
         };
-        todo!();
+
+        // 3. 插入到 BTreeMap
+        // BTreeMap 会自动按照 TicketId 的顺序存储
+        self.tickets.insert(id, ticket);
+
+        // 4. 返回 ID
         id
     }
 
+    // 获取 ticket 的不可变引用，O(log n) 时间复杂度
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
-        todo!()
+        self.tickets.get(&id)
     }
 
+    // 获取 ticket 的可变引用，O(log n) 时间复杂度
     pub fn get_mut(&mut self, id: TicketId) -> Option<&mut Ticket> {
-        todo!()
+        self.tickets.get_mut(&id)
     }
 }
 
@@ -92,6 +105,37 @@ impl IndexMut<TicketId> for TicketStore {
 impl IndexMut<&TicketId> for TicketStore {
     fn index_mut(&mut self, index: &TicketId) -> &mut Self::Output {
         &mut self[*index]
+    }
+}
+
+// 实现 IntoIterator for &TicketStore
+// 这样就可以用 &store 进行迭代，获取所有 tickets
+impl<'a> IntoIterator for &'a TicketStore {
+    // Item 是迭代器产生的元素类型：&Ticket
+    type Item = &'a Ticket;
+    // IntoIter 是迭代器类型
+    type IntoIter = TicketStoreIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        // BTreeMap 的 values() 方法已经按 key 的顺序返回值
+        TicketStoreIterator {
+            inner: self.tickets.values(),
+        }
+    }
+}
+
+// 自定义迭代器类型，包装 BTreeMap 的值迭代器
+pub struct TicketStoreIterator<'a> {
+    // 内部使用 BTreeMap 的 Values 迭代器
+    inner: std::collections::btree_map::Values<'a, TicketId, Ticket>,
+}
+
+// 为迭代器实现 Iterator trait
+impl<'a> Iterator for TicketStoreIterator<'a> {
+    type Item = &'a Ticket;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next()  // 委托给内部的 BTreeMap 迭代器
     }
 }
 
